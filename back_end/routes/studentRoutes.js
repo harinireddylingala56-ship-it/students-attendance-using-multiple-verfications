@@ -5,11 +5,6 @@ const Staff = require("../models/Staff");
 
 const router = express.Router();
 
-
-// ==========================
-// POST - ADD STAFF
-// ==========================
-
 router.post("/", async (req, res) => {
 
     try {
@@ -51,11 +46,6 @@ router.post("/", async (req, res) => {
     }
 });
 
-
-// ==========================
-// GET - ALL STAFF
-// ==========================
-
 router.get("/", async (req, res) => {
 
     try {
@@ -73,11 +63,6 @@ router.get("/", async (req, res) => {
 
     }
 });
-
-
-// ==========================
-// GET - ONE STAFF
-// ==========================
 
 router.get("/:id", async (req, res) => {
 
@@ -102,11 +87,6 @@ router.get("/:id", async (req, res) => {
 
     }
 });
-
-
-// ==========================
-// PATCH - UPDATE STAFF
-// ==========================
 
 router.patch("/:id", async (req, res) => {
 
@@ -141,11 +121,6 @@ router.patch("/:id", async (req, res) => {
 
     }
 });
-
-
-// ==========================
-// DELETE - DELETE STAFF
-// ==========================
 
 router.delete("/:id", async (req, res) => {
 

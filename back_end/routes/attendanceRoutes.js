@@ -2,12 +2,6 @@ const express = require("express");
 const Attendance = require("../models/Attendance");
 
 const router = express.Router();
-
-
-// ==========================
-// POST - ADD ATTENDANCE
-// ==========================
-
 router.post("/", async (req, res) => {
 
     try {
@@ -46,10 +40,6 @@ router.post("/", async (req, res) => {
 });
 
 
-// ==========================
-// GET - ALL ATTENDANCE
-// ==========================
-
 router.get("/", async (req, res) => {
 
     try {
@@ -67,11 +57,6 @@ router.get("/", async (req, res) => {
 
     }
 });
-
-
-// ==========================
-// GET - ONE ATTENDANCE
-// ==========================
 
 router.get("/:id", async (req, res) => {
 
@@ -96,11 +81,6 @@ router.get("/:id", async (req, res) => {
 
     }
 });
-
-
-// ==========================
-// PATCH - UPDATE ATTENDANCE
-// ==========================
 
 router.patch("/:id", async (req, res) => {
 
@@ -135,12 +115,6 @@ router.patch("/:id", async (req, res) => {
 
     }
 });
-
-
-// ==========================
-// DELETE - DELETE ATTENDANCE
-// ==========================
-
 router.delete("/:id", async (req, res) => {
 
     try {
