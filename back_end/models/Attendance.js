@@ -28,10 +28,12 @@ const attendanceSchema = new mongoose.Schema({
         required: true
     }
 
-}, {
-    collection: "attendance"
 });
 
-const Attendance = mongoose.model("Attendance", attendanceSchema);
+const Attendance = mongoose.model(
+    "Attendance",
+    attendanceSchema,
+    "attendances"
+);
 
 module.exports = Attendance;
