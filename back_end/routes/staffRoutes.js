@@ -26,14 +26,12 @@ router.post("/", async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const staff = new Staff({
-
             staffId,
             name,
             email,
             password: hashedPassword,
             department,
             role
-
         });
 
         const savedStaff = await staff.save();
@@ -51,9 +49,7 @@ router.post("/", async (req, res) => {
         });
 
     }
-
 });
-
 
 // ===============================
 // GET ALL STAFF
