@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Attendance Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="login-box">
+
+            <h1>Attendance Dashboard</h1>
+
+            <p id="welcome"></p>
+
+            <label>Student ID</label>
+
+            <input type="text" id="studentId" placeholder="Example: ST001">
+
+            <button onclick="getAttendance()">
+                View Attendance
+            </button>
+
+            <div id="attendanceResult"></div>
+
+            <button onclick="logout()">
+                Logout
+            </button>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const token =
+            localStorage.getItem("token");
+
+
+        if (!token) {
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        function logout() {
+
+            localStorage.removeItem("token");
+
+            localStorage.removeItem("loginType");
+
+            window.location.href =
+                "index.html";
+        }
+
+
+        async function getAttendance() {
+
+            const studentId =
+                document.getElementById(
+                    "studentId"
+                ).value;
+
+            const result =
+                document.getElementById(
+                    "attendanceResult"
+                );
+
+
+            if (!studentId) {
+
+                result.innerHTML =
+                    "<p>Please enter Student ID</p>";
+
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `http://localhost:5000/api/attendance/student/${studentId}`,
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "Authorization":
+                                    "Bearer " + token
+                            }
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    result.innerHTML =
+                        `<p>${data.message}</p>`;
+
+                    return;
+                }
+
+
+                let html =
+                    "<h3>Attendance Records</h3>";
+
+
+                data.forEach(record => {
+
+                    html += `
+
+                        <div style="
+                            padding:15px;
+                            margin-top:10px;
+                            border:1px solid #ddd;
+                            border-radius:8px;
+                        ">
+
+                            <p>
+                                <b>Date:</b>
+                                ${new Date(record.date)
+                            .toLocaleDateString()}
+                            </p>
+
+                            <p>
+                                <b>Time:</b>
+                                ${record.time}
+                            </p>
+
+                            <p>
+                                <b>Verification:</b>
+                                ${record.verificationMethod}
+                            </p>
+
+                            <p>
+                                <b>Status:</b>
+                                ${record.status}
+                            </p>
+
+                        </div>
+
+                    `;
+
+                });
+
+
+                result.innerHTML = html;
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                result.innerHTML =
+                    "<p>Server connection error</p>";
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
