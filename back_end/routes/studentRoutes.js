@@ -1,152 +1,99 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-
-const Staff = require("../models/Staff");
+const Student = require("../models/Student");
 
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-
     try {
+        console.log("Received body:", req.body);
 
         const {
-            staffId,
+            studentId,
+            rollNumber,
             name,
             email,
             password,
-            department,
-            role
+            branch,
+            year,
+            section
         } = req.body;
+
+        if (
+            !studentId || !rollNumber || !name ||
+            !email || !password || !branch ||
+            year == null || !section
+        ) {
+            return res.status(400).json({
+                message: "All student fields are required"
+            });
+        }
+
+        const existingStudent = await Student.findOne({
+            $or: [
+                { studentId },
+                { rollNumber },
+                { email }
+            ]
+        });
+
+        if (existingStudent) {
+            return res.status(409).json({
+                message: "Student ID, roll number, or email already exists"
+            });
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const staff = new Staff({
-            staffId,
+        const student = new Student({
+            studentId,
+            rollNumber,
             name,
             email,
             password: hashedPassword,
-            department,
-            role
+            branch,
+            year,
+            section
         });
 
-        const savedStaff = await staff.save();
+        const savedStudent = await student.save();
 
-        res.status(201).json({
-            message: "Staff added successfully",
-            staff: savedStaff
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            message: "Error adding staff",
-            error: error.message
-        });
-
-    }
-});
-
-router.get("/", async (req, res) => {
-
-    try {
-
-        const staff = await Staff.find();
-
-        res.status(200).json(staff);
-
-    } catch (error) {
-
-        res.status(500).json({
-            message: "Error getting staff",
-            error: error.message
-        });
-
-    }
-});
-
-router.get("/:id", async (req, res) => {
-
-    try {
-
-        const staff = await Staff.findById(req.params.id);
-
-        if (!staff) {
-            return res.status(404).json({
-                message: "Staff not found"
-            });
-        }
-
-        res.status(200).json(staff);
-
-    } catch (error) {
-
-        res.status(500).json({
-            message: "Error getting staff",
-            error: error.message
-        });
-
-    }
-});
-
-router.patch("/:id", async (req, res) => {
-
-    try {
-
-        const staff = await Staff.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true
+        return res.status(201).json({
+            message: "Student added successfully",
+            student: {
+                studentId: savedStudent.studentId,
+                rollNumber: savedStudent.rollNumber,
+                name: savedStudent.name,
+                email: savedStudent.email,
+                branch: savedStudent.branch,
+                year: savedStudent.year,
+                section: savedStudent.section
             }
-        );
-
-        if (!staff) {
-            return res.status(404).json({
-                message: "Staff not found"
-            });
-        }
-
-        res.status(200).json({
-            message: "Staff updated successfully",
-            staff: staff
         });
 
     } catch (error) {
+        console.error("Student error:", error);
 
-        res.status(500).json({
-            message: "Error updating staff",
+        return res.status(500).json({
+            message: "Error adding student",
             error: error.message
         });
-
     }
 });
-
-router.delete("/:id", async (req, res) => {
-
+// Get all students
+router.get("/", async (req, res) => {
     try {
-
-        const staff = await Staff.findByIdAndDelete(req.params.id);
-
-        if (!staff) {
-            return res.status(404).json({
-                message: "Staff not found"
-            });
-        }
-
-        res.status(200).json({
-            message: "Staff deleted successfully"
-        });
-
+        const students = await Student.find().select("-password");
+        res.status(200).json(students);
     } catch (error) {
-
+        console.error("Error fetching students:", error);
         res.status(500).json({
-            message: "Error deleting staff",
+            message: "Error fetching students",
             error: error.message
         });
-
     }
 });
 
+module.exports = router;
 
 module.exports = router;
