@@ -7,7 +7,6 @@ let allStudents = [];
 let allFaculty = [];
 
 const API = "http://localhost:5000/api";
-
 const token = localStorage.getItem("token");
 
 
@@ -18,8 +17,8 @@ const token = localStorage.getItem("token");
 if (!token || localStorage.getItem("loginType") !== "admin") {
 
     alert("Please login as Admin");
-
     window.location.href = "index.html";
+
 }
 
 
@@ -37,6 +36,7 @@ async function apiRequest(endpoint, method = "GET", body = null) {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
         }
+
     };
 
     if (body !== null) {
@@ -52,6 +52,7 @@ async function apiRequest(endpoint, method = "GET", body = null) {
     }
 
     return data;
+
 }
 
 
@@ -67,9 +68,7 @@ async function loadDashboard() {
             await Promise.all([
 
                 apiRequest("/students"),
-
                 apiRequest("/staff"),
-
                 apiRequest("/attendance")
 
             ]);
@@ -111,7 +110,6 @@ async function loadDashboard() {
         // Display all records
 
         displayStudents(allStudents);
-
         displayFaculty(allFaculty);
 
 
@@ -126,6 +124,7 @@ async function loadDashboard() {
             "Unable to load faculty: " + error.message;
 
     }
+
 }
 
 
@@ -140,8 +139,8 @@ function displayStudents(students) {
     if (students.length === 0) {
 
         container.innerHTML = "No students registered.";
-
         return;
+
     }
 
 
@@ -217,8 +216,8 @@ function displayFaculty(faculty) {
     if (faculty.length === 0) {
 
         container.innerHTML = "No faculty registered.";
-
         return;
+
     }
 
 
@@ -337,8 +336,8 @@ async function addStudent() {
     ) {
 
         alert("Please fill all required student fields.");
-
         return;
+
     }
 
 
@@ -361,7 +360,6 @@ async function addStudent() {
 
 
         await loadDashboard();
-
 
     } catch (error) {
 
@@ -418,8 +416,8 @@ async function editStudent(id) {
     ) {
 
         alert("Please enter valid student details.");
-
         return;
+
     }
 
 
@@ -540,8 +538,8 @@ async function addFaculty() {
     ) {
 
         alert("Please fill all faculty fields.");
-
         return;
+
     }
 
 
@@ -612,8 +610,8 @@ async function editFaculty(id) {
     ) {
 
         alert("Please enter valid faculty details.");
-
         return;
+
     }
 
 
@@ -683,7 +681,7 @@ async function deleteFaculty(id) {
 
 
 // ==========================================
-// SEARCH STUDENTS BY ID OR NAME
+// SEARCH AND FILTER STUDENTS
 // ==========================================
 
 function filterStudents() {
@@ -728,6 +726,12 @@ function filterStudents() {
     displayStudents(filteredStudents);
 
 }
+
+
+// ==========================================
+// SEARCH FACULTY
+// ==========================================
+
 function filterFaculty() {
 
     const searchValue = document
@@ -743,10 +747,13 @@ function filterFaculty() {
 
         const email = (member.email || "").toLowerCase();
 
+        const staffId = (member.staffId || "").toLowerCase();
+
 
         return (
             name.includes(searchValue) ||
-            email.includes(searchValue)
+            email.includes(searchValue) ||
+            staffId.includes(searchValue)
         );
 
     });
@@ -755,6 +762,12 @@ function filterFaculty() {
     displayFaculty(filteredFaculty);
 
 }
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
 function logout() {
 
     localStorage.removeItem("token");
