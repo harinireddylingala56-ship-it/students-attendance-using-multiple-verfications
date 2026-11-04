@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Admin Dashboard</h1>
+        <p>Student Attendance Management System</p>
+
+        <h2>Welcome, Admin!</h2>
+
+        <!-- DASHBOARD STATISTICS -->
+        <div class="stats">
+
+            <div class="card">
+                <h3>Total Students</h3>
+                <p id="studentCount">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Faculty</h3>
+                <p id="facultyCount">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Attendance</h3>
+                <p id="attendanceCount">0</p>
+            </div>
+
+        </div>
+
+
+        <!-- STUDENT MANAGEMENT -->
+        <h2>Registered Students</h2>
+
+        <div class="admin-actions">
+
+            <h3>Manage Students</h3>
+
+            <button onclick="showAddStudentForm()">
+                + Add Student
+            </button>
+
+        </div>
+
+
+        <!-- ADD STUDENT FORM -->
+        <div id="studentForm" style="display:none;">
+
+            <h3>Add Student</h3>
+
+            <input id="studentId" placeholder="Student ID">
+
+            <input id="rollNumber" placeholder="Roll Number">
+
+            <input id="studentName" placeholder="Name">
+
+            <input id="studentEmail" type="email" placeholder="Email">
+
+            <input id="studentPassword" type="password" placeholder="Password">
+
+            <input id="studentBranch" placeholder="Branch">
+
+            <input id="studentYear" type="number" placeholder="Year">
+
+            <input id="studentSection" placeholder="Section">
+
+            <button onclick="addStudent()">
+                Save Student
+            </button>
+
+            <button onclick="hideStudentForm()">
+                Cancel
+            </button>
+
+        </div>
+
+
+        <!-- STUDENT SEARCH AND FILTER -->
+        <div class="search-section">
+
+            <input type="text" id="studentSearch" placeholder="Search by Student ID or Name" oninput="searchStudents()">
+
+            <select id="branchFilter" onchange="searchStudents()">
+
+                <option value="">All Branches</option>
+                <option value="CSE">CSE</option>
+                <option value="ECE">ECE</option>
+                <option value="IT">IT</option>
+                <option value="EEE">EEE</option>
+                <option value="MECH">MECH</option>
+
+            </select>
+
+        </div>
+
+
+        <!-- STUDENT TABLE -->
+        <div id="students">
+            Loading...
+        </div>
+
+
+
+        <!-- FACULTY MANAGEMENT -->
+        <h2>Registered Faculty</h2>
+
+        <div class="admin-actions">
+
+            <h3>Manage Faculty</h3>
+
+            <button onclick="showAddFacultyForm()">
+                + Add Faculty
+            </button>
+
+        </div>
+
+
+        <!-- ADD FACULTY FORM -->
+        <div id="facultyForm" style="display:none;">
+
+            <h3>Add Faculty</h3>
+
+            <input id="staffId" placeholder="Staff ID">
+
+            <input id="facultyName" placeholder="Faculty Name">
+
+            <input id="facultyEmail" type="email" placeholder="Faculty Email">
+
+            <input id="facultyPassword" type="password" placeholder="Password">
+
+            <input id="facultyDepartment" placeholder="Department">
+
+            <button onclick="addFaculty()">
+                Save Faculty
+            </button>
+
+            <button onclick="hideFacultyForm()">
+                Cancel
+            </button>
+
+        </div>
+
+
+        <!-- FACULTY SEARCH -->
+        <div class="search-section">
+
+            <input type="text" id="facultySearch" placeholder="Search Faculty by Name or Staff ID"
+                oninput="searchFaculty()">
+
+        </div>
+
+
+        <!-- FACULTY TABLE -->
+        <div id="faculty">
+            Loading...
+        </div>
+
+
+        <!-- LOGOUT -->
+        <button onclick="logout()" class="logout-btn">
+            Logout
+        </button>
+
+    </div>
+
+
+    <!-- ADMIN JAVASCRIPT -->
+    <script src="admin.js"></script>
+
+</body>
+
+</html>

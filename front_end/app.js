@@ -16,13 +16,23 @@ async function login() {
     }
 
     // Select API according to login type
+    // Select API according to login type
     let url;
 
     if (loginType === "student") {
+
         url = "http://localhost:5000/api/auth/student-login";
+
     } else if (loginType === "faculty") {
+
         url = "http://localhost:5000/api/auth/staff-login";
+
+    } else if (loginType === "admin") {
+
+        url = "http://localhost:5000/api/auth/admin-login";
+
     } else {
+
         message.innerText = "Invalid login type";
         message.style.color = "red";
         return;
@@ -114,8 +124,23 @@ async function login() {
         console.log("JWT token stored successfully");
 
         // Open dashboard
+        // Open dashboard
         setTimeout(() => {
-            window.location.href = "dashboard.html";
+
+            if (loginType === "admin") {
+
+                window.location.href = "admin-dashboard.html";
+
+            } else if (loginType === "faculty") {
+
+                window.location.href = "faculty-dashboard.html";
+
+            } else if (loginType === "student") {
+
+                window.location.href = "dashboard.html";
+
+            }
+
         }, 1000);
 
     } catch (error) {

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h2 {
+            color: #4b55b5;
+            margin-top: 30px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 15px;
+            margin: 5px 0;
+        }
+
+        button:hover {
+            background: #4c5ac4;
+        }
+
+        .logout {
+            background: #e74c3c;
+        }
+
+        .logout:hover {
+            background: #c0392b;
+        }
+
+        .form-section {
+            background: #f5f6ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            min-width: 650px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+        }
+
+        .message {
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        @media(max-width: 600px) {
+            .container {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <div>
+                <h1>Faculty Dashboard</h1>
+                <p>Student Attendance Management System</p>
+                <p id="welcome"></p>
+            </div>
+
+            <button class="logout" onclick="logout()">
+                Logout
+            </button>
+        </header>
+
+
+        <!-- STUDENT LIST -->
+
+        <h2>Registered Students</h2>
+
+        <input type="text" id="searchStudent" placeholder="Search by Student ID or Name" oninput="displayStudents()">
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Branch</th>
+                        <th>Year</th>
+                        <th>Section</th>
+                    </tr>
+                </thead>
+
+                <tbody id="studentTable">
+                    <tr>
+                        <td colspan="6">Loading students...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- MARK ATTENDANCE -->
+
+        <h2>Mark Attendance</h2>
+
+        <div class="form-section">
+
+            <label>Student ID</label>
+            <select id="studentId">
+                <option value="">Select Student</option>
+            </select>
+
+            <label>Date</label>
+            <input type="date" id="date">
+
+            <label>Time</label>
+            <input type="time" id="time">
+
+            <label>Verification Method</label>
+            <select id="verificationMethod">
+                <option value="Manual">Manual</option>
+                <option value="Face">Face Recognition</option>
+                <option value="QR">QR Verification</option>
+            </select>
+
+            <label>Status</label>
+            <select id="status">
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+            </select>
+
+            <button onclick="markAttendance()">
+                Submit Attendance
+            </button>
+
+            <p id="attendanceMessage" class="message"></p>
+
+        </div>
+
+
+        <!-- ATTENDANCE RECORDS -->
+
+        <h2>Attendance Records</h2>
+
+        <button onclick="getAttendance()">
+            Refresh Attendance
+        </button>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Verification</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="attendanceTable">
+                    <tr>
+                        <td colspan="5">Loading attendance...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const API = "http://localhost:5000";
+
+        const token = localStorage.getItem("token");
+
+        const loginType = localStorage.getItem("loginType");
+
+        if (!token || loginType !== "faculty") {
+            window.location.replace("index.html");
+        }
+
+        document.getElementById("welcome").innerText =
+            "Welcome, Faculty!";
+
+        let students = [];
+
+
+        // LOAD STUDENTS
+
+        async function getStudents() {
+
+            try {
+
+                const response = await fetch(
+                    `${API}/api/students`,
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Unable to fetch students");
+                }
+
+                const data = await response.json();
+
+                students = Array.isArray(data)
+                    ? data
+                    : (data.students || []);
+
+                displayStudents();
+                populateStudentDropdown();
+
+            } catch (error) {
+
+                console.error(error);
+
+                document.getElementById("studentTable").innerHTML =
+                    `<tr><td colspan="6">Unable to load students</td></tr>`;
+            }
+        }
+
+
+        // DISPLAY STUDENTS
+
+        function displayStudents() {
+
+            const search = document
+                .getElementById("searchStudent")
+                .value.toLowerCase();
+
+            const filtered = students.filter(student =>
+                (student.studentId || "").toLowerCase().includes(search) ||
+                (student.name || "").toLowerCase().includes(search)
+            );
+
+            const table = document.getElementById("studentTable");
+
+            table.innerHTML = "";
+
+            if (filtered.length === 0) {
+                table.innerHTML =
+                    `<tr><td colspan="6">No students found</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(student => {
+
+                const row = document.createElement("tr");
+
+                [
+                    student.studentId,
+                    student.name,
+                    student.email,
+                    student.branch,
+                    student.year,
+                    student.section
+                ].forEach(value => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value ?? "";
+                    row.appendChild(cell);
+                });
+
+                table.appendChild(row);
+            });
+        }
+
+
+        // POPULATE STUDENT DROPDOWN
+
+        function populateStudentDropdown() {
+
+            const dropdown = document.getElementById("studentId");
+
+            dropdown.innerHTML =
+                `<option value="">Select Student</option>`;
+
+            students.forEach(student => {
+
+                const option = document.createElement("option");
+
+                option.value = student.studentId;
+                option.textContent =
+                    `${student.studentId} - ${student.name}`;
+
+                dropdown.appendChild(option);
+            });
+        }
+
+
+        // MARK ATTENDANCE
+
+        async function markAttendance() {
+
+            const studentId =
+                document.getElementById("studentId").value;
+
+            const date =
+                document.getElementById("date").value;
+
+            const time =
+                document.getElementById("time").value;
+
+            const verificationMethod =
+                document.getElementById("verificationMethod").value;
+
+            const status =
+                document.getElementById("status").value;
+
+            const message =
+                document.getElementById("attendanceMessage");
+
+            if (!studentId || !date || !time) {
+
+                message.innerText =
+                    "Please fill all required fields";
+
+                message.style.color = "red";
+
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    `${API}/api/attendance`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+
+                        body: JSON.stringify({
+                            studentId,
+                            date,
+                            time,
+                            verificationMethod,
+                            status
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+
+                    message.innerText =
+                        data.message || "Attendance submission failed";
+
+                    message.style.color = "red";
+
+                    return;
+                }
+
+                message.innerText =
+                    "Attendance added successfully!";
+
+                message.style.color = "green";
+
+                getAttendance();
+
+            } catch (error) {
+
+                console.error(error);
+
+                message.innerText =
+                    "Cannot connect to server";
+
+                message.style.color = "red";
+            }
+        }
+
+
+        // GET ALL ATTENDANCE
+
+        async function getAttendance() {
+
+            const table =
+                document.getElementById("attendanceTable");
+
+            try {
+
+                const response = await fetch(
+                    `${API}/api/attendance`,
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Unable to fetch attendance");
+                }
+
+                const data = await response.json();
+
+                const records = Array.isArray(data) ? data : [];
+
+                table.innerHTML = "";
+
+                if (records.length === 0) {
+
+                    table.innerHTML =
+                        `<tr><td colspan="5">No attendance records found</td></tr>`;
+
+                    return;
+                }
+
+                records.forEach(record => {
+
+                    const row = document.createElement("tr");
+
+                    const dateValue = record.date
+                        ? new Date(record.date).toLocaleDateString()
+                        : "";
+
+                    [
+                        record.studentId,
+                        dateValue,
+                        record.time,
+                        record.verificationMethod,
+                        record.status
+                    ].forEach(value => {
+
+                        const cell = document.createElement("td");
+
+                        cell.textContent = value ?? "";
+
+                        row.appendChild(cell);
+                    });
+
+                    table.appendChild(row);
+                });
+
+            } catch (error) {
+
+                console.error(error);
+
+                table.innerHTML =
+                    `<tr><td colspan="5">Error loading attendance</td></tr>`;
+            }
+        }
+
+
+        // LOGOUT
+
+        function logout() {
+
+            localStorage.removeItem("token");
+            localStorage.removeItem("loginType");
+            localStorage.removeItem("username");
+
+            window.location.replace("index.html");
+        }
+
+
+        // SET DEFAULT DATE AND TIME
+
+        const now = new Date();
+
+        document.getElementById("date").value =
+            now.toLocaleDateString("en-CA");
+
+        document.getElementById("time").value =
+            now.toTimeString().slice(0, 5);
+
+
+        // LOAD DATA
+
+        getStudents();
+        getAttendance();
+
+    </script>
+
+</body>
+
+</html>
